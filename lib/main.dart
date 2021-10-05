@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:convert';
 import 'behavior.dart';
-
+import 'package:pretty_json/pretty_json.dart';
 void main() {
   runApp(MyApp());
 }
@@ -36,7 +36,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     final MyHomePageLogic _logic = Get.put(MyHomePageLogic());
-    List responses = [];
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -58,20 +57,15 @@ class _MyHomePageState extends State<MyHomePage> {
               child: StreamBuilder(
                 stream: _logic._channel.stream,
                 builder: (context, snapshot) {
-                  if (snapshot.hasData) { Map<String, dynamic> json = jsonDecode(snapshot.data.toString()); }
-                  //TODO: change state of PromptInfo
-                  responses.add(snapshot.data);
-                  //if (responses.length > 3) {
-                  //  responses.removeAt(0);
-                  // }
+                  _logic.handleResponse(snapshot);
                   return ListView.builder(
                     reverse: true,
                     itemBuilder: (context, index) {
                       return ListTile(
-                        title: Text(responses[index].toString()),
+                        title: Text(_logic.responses[index]),
                       );
                     },
-                    itemCount: responses.length,
+                    itemCount: _logic.responses.length,
                   );
                 },
               ),
@@ -103,6 +97,7 @@ class MyHomePageLogic extends GetxController {
   var db = ''.obs;
   var schemaname = ''.obs;
   var headname = ''.obs;
+  var responses = [].obs;
 
   void sendMessage() {
     print('send ${textCtr.text}');
@@ -119,6 +114,17 @@ class MyHomePageLogic extends GetxController {
             _channel.sink.add('executetutd/json:' + textCtr.text);
           }
       }
+    }
+  }
+
+  void handleResponse(snapshot){
+    if (snapshot.hasData) { 
+      Map<String, dynamic> json = jsonDecode(snapshot.data.toString());
+// unexpected response: promptInfo. expected displayrelation in :showexpr true, a := ... :showexpr a, ...
+//TODO: displayerror, displayrelation, promptInfo
+
+      //TODO: change state of PromptInfo
+      responses.add(prettyJson(json, indent: 2));
     }
   }
   void onClose(){
