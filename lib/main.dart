@@ -4,6 +4,8 @@ import 'package:web_socket_channel/io.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:convert';
+import 'behavior.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -16,6 +18,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       title: title,
       home: MyHomePage(title: title),
+      scrollBehavior: MyScrollBehavior(),
     );
   }
 }
@@ -58,9 +61,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   if (snapshot.hasData) { Map<String, dynamic> json = jsonDecode(snapshot.data.toString()); }
                   //TODO: change state of PromptInfo
                   responses.add(snapshot.data);
-                  if (responses.length > 3) {
-                    responses.removeAt(0);
-                  }
+                  //if (responses.length > 3) {
+                  //  responses.removeAt(0);
+                  // }
                   return ListView.builder(
                     reverse: true,
                     itemBuilder: (context, index) {
