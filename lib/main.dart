@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'dart:convert';
 import 'behavior.dart';
 import 'package:pretty_json/pretty_json.dart';
+import 'relation.dart';
 
 void main() {
   runApp(MyApp());
@@ -58,10 +59,12 @@ class _MyHomePageState extends State<MyHomePage> {
             Container(
               height: 250,
               child: Obx(() => ListView.builder(
-                    //reverse: true,
                     itemBuilder: (context, index) {
                       return ListTile(
-                        title: Text(_logic.responses[index]),
+                        title: SelectableText(
+                                 _logic.responses[index],
+                                 scrollPhysics: ClampingScrollPhysics(),
+                               ),
                       );
                     },
                     itemCount: _logic.responses.length,
@@ -126,7 +129,8 @@ class MyHomePageLogic extends GetxController {
       responses.insert(0, displayError.value?.error);
     }
     else if (json.containsKey('displayrelation')){
-      responses.insert(0, prettyJson(json, indent: 2));
+      //responses.insert(0, prettyJson(json, indent: 2));
+      responses.insert(0, DisplayRelation.fromJson(json['displayrelation']).toString());
     }
   }
 
@@ -135,50 +139,4 @@ class MyHomePageLogic extends GetxController {
   }
 }
 
-class PromptInfo {
-  final String schemaName;
-  final String headName;
 
-  PromptInfo(this.schemaName, this.headName);
-
-  PromptInfo.fromJson(Map<String, dynamic> json)
-      : schemaName = json['schemaname'],
-        headName = json['headname'];
-
-  Map<String, dynamic> toJson() => {
-        'promptInfo': {
-          'schemaname': schemaName,
-          'headname': headName,
-        }
-      };
-}
-
-class DisplayError {
-  final String error;
-
-  DisplayError(this.error);
-
-  DisplayError.fromJson(Map<String, dynamic> json) : error = json['json'];
-
-  Map<String, dynamic> toJson() => {
-        'displayerror': {'json': error}
-      };
-}
-
-/*
-class DisplayRelation {
-
-  DisplayRelation();
-
-  DisplayRelation.fromJson(Map<String, dynamic> json)
-      : schemaName = json['schemaname'],
-        headName = json['headname'];
-
-  Map<String, dynamic> toJson() => {
-        'displayrelation': {
-          'schemaname': schemaName,
-          'headname': headName,
-        }
-      };
-}
-*/
