@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:convert';
 import 'behavior.dart';
-import 'package:pretty_json/pretty_json.dart';
 import 'relation.dart';
 
 void main() {
@@ -61,10 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Obx(() => ListView.builder(
                     itemBuilder: (context, index) {
                       return ListTile(
-                        title: SelectableText(
-                                 _logic.responses[index],
-                                 scrollPhysics: ClampingScrollPhysics(),
-                               ),
+                        title: _logic.responses[index].buildItem(),
                       );
                     },
                     itemCount: _logic.responses.length,
@@ -95,8 +91,8 @@ class MyHomePageLogic extends GetxController {
   var connPhase = ConnectionPhase.connectdb.obs;
   var db = ''.obs;
   var promptInfo = Rxn<PromptInfo>(); //nullable observable variable
-  var displayError = Rxn<DisplayError>();
-  var responses = [].obs;
+  List<Item> responses = <Item>[].obs;
+
 
   void onInit() {
     _channel.stream.listen((msg) => handleResponse(msg));
@@ -120,17 +116,25 @@ class MyHomePageLogic extends GetxController {
     }
   }
 
+//OK message
+//{
+//  "acknowledged": true
+//}
   void handleResponse(msg) {
     Map<String, dynamic> json = jsonDecode(msg);
     if (json.containsKey('promptInfo')) {
       promptInfo.value = PromptInfo.fromJson(json['promptInfo']);
+    } else if (json.containsKey('acknowledged')) {
+      responses.insert(0, DisplayJson.fromJson(json));
     } else if (json.containsKey('displayerror')) {
-      displayError.value = DisplayError.fromJson(json['displayerror']);
-      responses.insert(0, displayError.value?.error);
+      var e = DisplayError.fromJson(json['displayerror']);
+      responses.insert(0, e);
     }
     else if (json.containsKey('displayrelation')){
-      //responses.insert(0, prettyJson(json, indent: 2));
-      responses.insert(0, DisplayRelation.fromJson(json['displayrelation']).toString());
+      responses.insert(0, DisplayRelation.fromJson(json['displayrelation']));
+    }
+    else { 
+      responses.insert(0, DisplayJson.fromJson(json));
     }
   }
 
@@ -138,5 +142,6 @@ class MyHomePageLogic extends GetxController {
     _channel.sink.close();
   }
 }
+
 
 

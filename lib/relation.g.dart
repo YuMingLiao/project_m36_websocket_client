@@ -226,101 +226,102 @@ class Attribute$ {
 abstract class $AttributeType {
   const $AttributeType();
 
-  String get tag;
+  AtomType get atomType;
 
   AttributeType copyWith({
-    String? tag,
+    AtomType? atomType,
   }) =>
       AttributeType(
-        tag ?? this.tag,
+        atomType ?? this.atomType,
       );
 
   AttributeType copyUsing(void Function(AttributeType$Change change) mutator) {
     final change = AttributeType$Change._(
-      this.tag,
+      this.atomType,
     );
     mutator(change);
     return AttributeType(
-      change.tag,
+      change.atomType,
     );
   }
 
   @override
-  String toString() => "AttributeType(tag: $tag)";
+  String toString() => "AttributeType(atomType: $atomType)";
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) =>
       other is AttributeType &&
       other.runtimeType == runtimeType &&
-      tag == other.tag;
+      atomType == other.atomType;
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   int get hashCode {
-    return tag.hashCode;
+    return atomType.hashCode;
   }
 }
 
 class AttributeType$Change {
   AttributeType$Change._(
-    this.tag,
+    this.atomType,
   );
 
-  String tag;
+  AtomType atomType;
 }
 
 // ignore: avoid_classes_with_only_static_members
 class AttributeType$ {
-  static final tag = Lens<AttributeType, String>(
-    (tagContainer) => tagContainer.tag,
-    (tagContainer, tag) => tagContainer.copyWith(tag: tag),
+  static final atomType = Lens<AttributeType, AtomType>(
+    (atomTypeContainer) => atomTypeContainer.atomType,
+    (atomTypeContainer, atomType) =>
+        atomTypeContainer.copyWith(atomType: atomType),
   );
 }
 
 abstract class $Atom {
   const $Atom();
 
-  AttributeType get type;
-  String get val;
+  AttributeType get attrType;
+  dynamic get val;
 
   Atom copyWith({
-    AttributeType? type,
-    String? val,
+    AttributeType? attrType,
+    dynamic? val,
   }) =>
       Atom(
-        type ?? this.type,
+        attrType ?? this.attrType,
         val ?? this.val,
       );
 
   Atom copyUsing(void Function(Atom$Change change) mutator) {
     final change = Atom$Change._(
-      this.type,
+      this.attrType,
       this.val,
     );
     mutator(change);
     return Atom(
-      change.type,
+      change.attrType,
       change.val,
     );
   }
 
   @override
-  String toString() => "Atom(type: $type, val: $val)";
+  String toString() => "Atom(attrType: $attrType, val: $val)";
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) =>
       other is Atom &&
       other.runtimeType == runtimeType &&
-      type == other.type &&
+      attrType == other.attrType &&
       val == other.val;
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   int get hashCode {
     var result = 17;
-    result = 37 * result + type.hashCode;
+    result = 37 * result + attrType.hashCode;
     result = 37 * result + val.hashCode;
     return result;
   }
@@ -328,22 +329,23 @@ abstract class $Atom {
 
 class Atom$Change {
   Atom$Change._(
-    this.type,
+    this.attrType,
     this.val,
   );
 
-  AttributeType type;
-  String val;
+  AttributeType attrType;
+  dynamic val;
 }
 
 // ignore: avoid_classes_with_only_static_members
 class Atom$ {
-  static final type = Lens<Atom, AttributeType>(
-    (typeContainer) => typeContainer.type,
-    (typeContainer, type) => typeContainer.copyWith(type: type),
+  static final attrType = Lens<Atom, AttributeType>(
+    (attrTypeContainer) => attrTypeContainer.attrType,
+    (attrTypeContainer, attrType) =>
+        attrTypeContainer.copyWith(attrType: attrType),
   );
 
-  static final val = Lens<Atom, String>(
+  static final val = Lens<Atom, dynamic>(
     (valContainer) => valContainer.val,
     (valContainer, val) => valContainer.copyWith(val: val),
   );

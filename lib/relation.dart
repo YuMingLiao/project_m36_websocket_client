@@ -1,7 +1,11 @@
 import 'dart:io';
 import 'dart:convert';
 import 'package:functional_data/functional_data.dart';
+import 'package:flutter/material.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:pretty_json/pretty_json.dart';
 part 'relation.g.dart';
+part 'relation.freezed.dart';
 
 
 class PromptInfo {
@@ -22,7 +26,7 @@ class PromptInfo {
       };
 }
 
-class DisplayError {
+class DisplayError implements Item{
   final String error;
 
   DisplayError(this.error);
@@ -32,17 +36,33 @@ class DisplayError {
   Map<String, dynamic> toJson() => {
         'displayerror': {'json': error}
       };
+
+  @override
+  Widget buildItem() => Text(error);
+}
+
+//for debugging
+class DisplayJson implements Item{
+  final Map<String,dynamic> json;
+
+  DisplayJson(this.json);
+
+  DisplayJson.fromJson(Map<String, dynamic> json) : this.json = json;
+
+  Map<String, dynamic> toJson() => json;
+
+  @override
+  Widget buildItem() => SelectableText(prettyJson(json, indent: 2));
 }
 
 @FunctionalData()
-class DisplayRelation extends $DisplayRelation{
+class DisplayRelation extends $DisplayRelation implements Item{
   final List<Attribute> attributes;
   final List<Tuple> asList;
   DisplayRelation(this.attributes, this.asList);
-
   DisplayRelation.fromJson(Map<String, dynamic> _json)
-      : attributes = List<Attribute>.from((_json['json'][0]['attributes']).map((e) => Attribute.fromJson(e)).toList()),
-        asList = List<Tuple>.from(_json['json'][1]['asList'].map((e) => Tuple.fromJson(e)).toList());
+    : attributes = List<Attribute>.from((_json['json'][0]['attributes']).map((e) => Attribute.fromJson(e)).toList()),
+      asList = List<Tuple>.from(_json['json'][1]['asList'].map((e) => Tuple.fromJson(e)).toList());
 
   Map<String, dynamic> toJson() => {
         'displayrelation': {
@@ -52,6 +72,15 @@ class DisplayRelation extends $DisplayRelation{
         }
       };
 
+  @override
+  Widget buildItem() => DataTable(
+      columns: (attributes.length == 0) 
+               ? [DataColumn(label: Text(''))]
+               : attributes.map((e)=> DataColumn(label: Text('${e.name}::${e.type.atomType.name}'))).toList(),
+      rows: (attributes.length == 0 && asList.length == 1) 
+            ? [DataRow(cells:[DataCell(Text(''))])]
+            : asList.map((e)=>DataRow(cells: e.atoms.map((e)=>DataCell(Text(e.toString()))).toList())).toList(),
+    );
 }
 @FunctionalData()
 class Tuple extends $Tuple{
@@ -76,27 +105,177 @@ class Attribute extends $Attribute{
         'type' : type.toJson(), 
       };
 }
+
 @FunctionalData()
 class AttributeType extends $AttributeType {
-  final String tag;
-  AttributeType(this.tag);
+  final AtomType atomType;
+  AttributeType(this.atomType);
   AttributeType.fromJson(Map<String, dynamic> json)
-      : tag = json['tag'];
+      : atomType = AtomType.fromJson(json);
   Map<String, dynamic> toJson() => {
-        'tag' : tag,
+        'tag' : atomType.toString(), //fix is needed here
       };
+  @override
+  String toString() => '${atomType.toString()}';
+  String get name => atomType.maybeWhen(
+      constructedAtomType: (tConsName, tvMap) => tConsName + ' ' + tvMap.entries.fold("",(i,j)=> i + (j.value.toString())),
+      orElse: () => atomType.toString().replaceAll('AtomType.','').replaceAll('AtomType()','').toCapitalized(),
+  );
 }
 
 @FunctionalData()
 class Atom extends $Atom{
-  final AttributeType type;
-  final String val;
-  Atom(this.type,this.val);
+  final AttributeType attrType;
+  final dynamic val;
+  Atom(this.attrType,this.val);
   Atom.fromJson(Map<String, dynamic> json)
-      : type = AttributeType.fromJson(json['type']),
-        val  = json ['val'];
+      : attrType = AttributeType.fromJson(json['type']),
+        val  = (json['type']['tag'] != 'ConstructedAtomType')
+             ? json ['val']
+             : ConstructedAtom.fromJson(json);
   Map<String, dynamic> toJson() => {
-        'type' : type.toJson,
+        'type' : attrType.toJson,
         'val'  : val,
       };
+  @override
+  String toString() =>
+    attrType.atomType.when(
+      intAtomType: () => '${val.toString()}',
+      integerAtomType: () => '${val.toString()}',
+      doubleAtomType: () => '${val.toString()}',
+      textAtomType: () => '\"${val}\"',
+      boolAtomType: () => '${val.toString()}',
+      constructedAtomType: (tConsName, tvMap) => '${val.toString()}');
 }
+
+class ConstructedAtom {
+  final String dataConstructorName;
+  final List<Atom> atomList;
+  final AtomType atomType;
+  ConstructedAtom.fromJson(Map<String, dynamic> json)
+      : dataConstructorName = json['dataconstructorname'],
+        atomList  = json['atomlist'].map((e)=>Atom.fromJson(e)).toList().cast<Atom>(),
+        atomType = AtomType.fromJson(json['type']);
+
+  @override
+  String toString() => '${dataConstructorName}' + atomList.fold('', (prev, element)=>prev + ' ' + (element.toString().contains(' ') ? '(' + element.toString() + ')' : element.toString()));
+}
+abstract class Item {
+  Widget buildItem();
+}
+
+//MAYBE TODO: replace boilerplate with biMap
+@freezed
+class AtomType with _$AtomType {
+  const AtomType._(); 
+  const factory AtomType.intAtomType() = IntAtomType;
+  const factory AtomType.integerAtomType() = IntegerAtomType;
+  const factory AtomType.doubleAtomType() = DoubleAtomType;
+  const factory AtomType.textAtomType() = TextAtomType;
+  const factory AtomType.boolAtomType() = BoolAtomType;
+  const factory AtomType.constructedAtomType(String typeConstructorName, Map<String,AtomType> typeVarMap) = ConstructedAtomType; //contents is a b c in A, B a, C a b, D a b c
+//                DayAtomType |
+//                DateTimeAtomType |
+//                ByteStringAtomType |
+//                RelationAtomType Attributes |
+//                ConstructedAtomType TypeConstructorName TypeVarMap |
+//                RelationalExprAtomType |
+//                TypeVariableType TypeVarName
+
+  static AtomType fromJson(Map<String,dynamic> json){
+    if(json['tag']=="IntAtomType"){ return AtomType.intAtomType(); }
+    else if(json['tag']=="IntegerAtomType"){ return AtomType.integerAtomType(); }
+    else if(json['tag']=="DoubleAtomType"){ return AtomType.doubleAtomType(); }
+    else if(json['tag']=="TextAtomType"){ return AtomType.textAtomType(); }
+    else if(json['tag']=="BoolAtomType"){ return AtomType.boolAtomType(); }
+    else if(json['tag']=="ConstructedAtomType"){
+      String tConsName = json['contents'][0]; /* TypeVarMap */
+      Map<String,AtomType> tvMap = json['contents'][1].map((k,v)=>MapEntry(k,AtomType.fromJson(v))).cast<String,AtomType>();
+      return AtomType.constructedAtomType(tConsName, tvMap); } 
+    else { throw UnimplementedError(json.toString()); } 
+  }
+  String get name => this.maybeWhen(
+      constructedAtomType: (tConsName, tvMap) => tConsName + ' ' + tvMap.entries.fold("",(i,j)=> i + (j.value.name)),
+      orElse: () => this.toString().replaceAll('AtomType.','').replaceAll('AtomType()','').toCapitalized(),
+  );
+
+}  
+
+extension StringCasingExtension on String {
+  String toCapitalized() => this.length > 0 ?'${this[0].toUpperCase()}${this.substring(1)}':'';
+}
+
+
+// ConstructedAtom DataConstructorName AtomType [Atom]
+// ConstructedAtomType TypeConstructorName TypeVarMap
+/*
+String constructedAtomTypeJson = '''
+{
+  "displayrelation": {
+    "json": [
+      {
+        "attributes": [
+          {
+            "name": "field",
+            "type": {
+              "tag": "ConstructedAtomType",
+              "contents": [
+                "A",
+                {}
+              ]
+         }
+          }
+        ]
+      },
+      {
+        "asList": [
+          [
+            {
+              "attributes": [
+                {
+                  "name": "field",
+                  "type": {
+                    "tag": "ConstructedAtomType",
+                    "contents": [
+                      "A",
+                      {}
+                    ]
+                  }
+                }
+              ]
+            },
+            [
+              {
+                "dataconstructorname": "B",
+                "atomlist": [],
+                "type": {
+                  "tag": "ConstructedAtomType",
+                  "contents": [
+                    "A",
+                    {}
+                  ]
+                }
+              }
+            ]
+           },
+            [
+              {
+                "dataconstructorname": "B",
+                "atomlist": [],
+                "type": {
+                  "tag": "ConstructedAtomType",
+                  "contents": [
+                    "A",
+                    {}
+                  ]
+                }
+              }
+            ]
+          ]
+        ]
+      }
+    ]
+  }
+}
+'''
+*/
