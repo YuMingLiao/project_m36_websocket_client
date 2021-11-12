@@ -27,11 +27,12 @@ class PromptInfo {
 }
 
 class DisplayError implements Item{
+  final String command;
   final String error;
 
-  DisplayError(this.error);
+  DisplayError(this.command, this.error);
 
-  DisplayError.fromJson(Map<String, dynamic> json) : error = json['json'];
+  DisplayError.fromJson(this.command, Map<String, dynamic> json): error = json['json'];
 
   Map<String, dynamic> toJson() => {
         'displayerror': {'json': error}
@@ -43,11 +44,12 @@ class DisplayError implements Item{
 
 //for debugging
 class DisplayJson implements Item{
+  final String command;
   final Map<String,dynamic> json;
 
-  DisplayJson(this.json);
+  DisplayJson(this.command, this.json);
 
-  DisplayJson.fromJson(Map<String, dynamic> json) : this.json = json;
+  DisplayJson.fromJson(this.command, Map<String, dynamic> json): json = json;
 
   Map<String, dynamic> toJson() => json;
 
@@ -57,12 +59,13 @@ class DisplayJson implements Item{
 
 @FunctionalData()
 class DisplayRelation extends $DisplayRelation implements Item{
+  final String command;
   final List<Attribute> attributes;
   final List<Tuple> asList;
-  DisplayRelation(this.attributes, this.asList);
-  DisplayRelation.fromJson(Map<String, dynamic> _json)
-    : attributes = List<Attribute>.from((_json['json'][0]['attributes']).map((e) => Attribute.fromJson(e)).toList()),
-      asList = List<Tuple>.from(_json['json'][1]['asList'].map((e) => Tuple.fromJson(e)).toList());
+  DisplayRelation(this.command, this.attributes, this.asList);
+  DisplayRelation.fromJson(this.command, Map<String, dynamic> _json):
+    attributes = List<Attribute>.from((_json['json'][0]['attributes']).map((e) => Attribute.fromJson(e)).toList()),
+    asList = List<Tuple>.from(_json['json'][1]['asList'].map((e) => Tuple.fromJson(e)).toList());
 
   Map<String, dynamic> toJson() => {
         'displayrelation': {
@@ -160,8 +163,12 @@ class ConstructedAtom {
   @override
   String toString() => '${dataConstructorName}' + atomList.fold('', (prev, element)=>prev + ' ' + (element.toString().contains(' ') ? '(' + element.toString() + ')' : element.toString()));
 }
-abstract class Item {
-  Widget buildItem();
+
+class Item {
+  final String command = "";
+  Widget buildItem(){
+    return Offstage(offstage: true, child:Text('undefined'),);
+  }
 }
 
 //MAYBE TODO: replace boilerplate with biMap

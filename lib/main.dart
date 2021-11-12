@@ -36,6 +36,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
     final MyHomePageLogic _ = Get.put(MyHomePageLogic());
     return Scaffold(
       appBar: AppBar(
@@ -83,7 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: TextField(
                       enabled: _.connPhase.value == ConnectionPhase.disconnected,
                       controller: _.portCtr,
-                      decoration: new InputDecoration(labelText: "Enter your number"),
+                      decoration: new InputDecoration(labelText: "port"),
                       keyboardType: TextInputType.number,
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly
@@ -122,30 +123,49 @@ class _MyHomePageState extends State<MyHomePage> {
               Form(
                 child: TextFormField(
                   enabled: _.connPhase.value == ConnectionPhase.executetutd,
-                  controller: _.textCtr,
+                  controller: _.commandCtr,
                   decoration: const InputDecoration(labelText: 'Enter a TutorialD query here.'),
                 ),
               ),
             ),
             Container(
-              width: MediaQuery.of(context).size.width,
+              width: width, 
               height: 190,
-              child: Obx(() => ListView.builder(
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        title: _.responses[index].buildItem(),
-                      );
+              child: GetBuilder<MyHomePageLogic>(builder: (_) => ListView.separated(
+                itemBuilder: (context, index) {
+                  return Dismissible(
+                    key: UniqueKey(),
+                    direction: DismissDirection.horizontal,
+                    onDismissed: (direction) {
+                      _.deleteResponse(index);
                     },
-                    itemCount: _.responses.length,
-                  )),
+                    child: ListTile(
+                      title: Column(
+                        children: [
+                            Text(_.responses[index].command),
+                            _.responses[index].buildItem(),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                separatorBuilder: (context, index) => Divider(height: 1, color: Colors.green),
+                itemCount: _.responses.length,
+              ),),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _.sendMessage,
-        tooltip: 'Send message',
-        child: Icon(Icons.send),
+      floatingActionButton: Obx(
+        () => FloatingActionButton.extended(
+          backgroundColor: _.connPhase.value == ConnectionPhase.executetutd ? Colors.blue : Colors.grey,
+          onPressed: _.connPhase.value == ConnectionPhase.executetutd ? _.sendMessage : null,
+          tooltip: 'Send message',
+          label: Text('Evaluate TutorialD'),// Icon(Icons.send),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(4)),
+          ),
+        ),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
@@ -170,7 +190,7 @@ class MyHomePageLogic extends GetxController {
   var connPhase = ConnectionPhase.disconnected.obs;
   var db = ''.obs;
   var promptInfo = Rxn<PromptInfo>(); //nullable observable variable
-  final TextEditingController textCtr = TextEditingController();
+  final TextEditingController commandCtr = TextEditingController();
   List<Item> responses = <Item>[].obs;
 
 
@@ -188,18 +208,18 @@ class MyHomePageLogic extends GetxController {
   }
 
   void sendMessage() {
-    print('send ${textCtr.text}');
-    if (textCtr.text.isNotEmpty) {
+    print('send ${commandCtr.text}');
+    if (commandCtr.text.isNotEmpty) {
       switch (connPhase.value) {
         case ConnectionPhase.disconnected:
           {
-            _channel.sink.add('connectdb:' + textCtr.text);
+            _channel.sink.add('connectdb:' + commandCtr.text);
             connPhase.value = ConnectionPhase.executetutd;
             break;
           }
         case ConnectionPhase.executetutd:
           {
-            _channel.sink.add('executetutd/json:' + textCtr.text);
+            _channel.sink.add('executetutd/json:' + commandCtr.text);
           }
       }
     }
@@ -214,22 +234,31 @@ class MyHomePageLogic extends GetxController {
     if (json.containsKey('promptInfo')) {
       promptInfo.value = PromptInfo.fromJson(json['promptInfo']);
     } else if (json.containsKey('acknowledged')) {
-      responses.insert(0, DisplayJson.fromJson(json));
+      responses.insert(0, DisplayJson.fromJson(commandCtr.text, json));
+      update();
     } else if (json.containsKey('displayerror')) {
-      var e = DisplayError.fromJson(json['displayerror']);
+      var e = DisplayError.fromJson(commandCtr.text, json['displayerror']);
       responses.insert(0, e);
+      update();
     }
     else if (json.containsKey('displayrelation')){
-      responses.insert(0, DisplayRelation.fromJson(json['displayrelation']));
+      responses.insert(0, DisplayRelation.fromJson(commandCtr.text, json['displayrelation']));
+      update();
     }
     else { 
-      responses.insert(0, DisplayJson.fromJson(json));
+      responses.insert(0, DisplayJson.fromJson(commandCtr.text, json));
+      update();
     }
+  }
+  deleteResponse(int index){
+    responses.removeAt(index);
+    update();
   }
   void disconnect() {
     responses.clear();
+    update();
     promptInfo.value = null;
-    textCtr.text = '';
+    commandCtr.text = '';
     _channel.sink.close();
     connPhase.value = ConnectionPhase.disconnected;
   }

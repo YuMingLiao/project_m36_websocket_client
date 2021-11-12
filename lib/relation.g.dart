@@ -9,14 +9,17 @@ part of 'relation.dart';
 abstract class $DisplayRelation {
   const $DisplayRelation();
 
+  String get command;
   List<Attribute> get attributes;
   List<Tuple> get asList;
 
   DisplayRelation copyWith({
+    String? command,
     List<Attribute>? attributes,
     List<Tuple>? asList,
   }) =>
       DisplayRelation(
+        command ?? this.command,
         attributes ?? this.attributes,
         asList ?? this.asList,
       );
@@ -24,11 +27,13 @@ abstract class $DisplayRelation {
   DisplayRelation copyUsing(
       void Function(DisplayRelation$Change change) mutator) {
     final change = DisplayRelation$Change._(
+      this.command,
       this.attributes,
       this.asList,
     );
     mutator(change);
     return DisplayRelation(
+      change.command,
       change.attributes,
       change.asList,
     );
@@ -36,13 +41,14 @@ abstract class $DisplayRelation {
 
   @override
   String toString() =>
-      "DisplayRelation(attributes: $attributes, asList: $asList)";
+      "DisplayRelation(command: $command, attributes: $attributes, asList: $asList)";
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) =>
       other is DisplayRelation &&
       other.runtimeType == runtimeType &&
+      command == other.command &&
       attributes == other.attributes &&
       asList == other.asList;
 
@@ -50,6 +56,7 @@ abstract class $DisplayRelation {
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   int get hashCode {
     var result = 17;
+    result = 37 * result + command.hashCode;
     result = 37 * result + attributes.hashCode;
     result = 37 * result + asList.hashCode;
     return result;
@@ -58,16 +65,23 @@ abstract class $DisplayRelation {
 
 class DisplayRelation$Change {
   DisplayRelation$Change._(
+    this.command,
     this.attributes,
     this.asList,
   );
 
+  String command;
   List<Attribute> attributes;
   List<Tuple> asList;
 }
 
 // ignore: avoid_classes_with_only_static_members
 class DisplayRelation$ {
+  static final command = Lens<DisplayRelation, String>(
+    (commandContainer) => commandContainer.command,
+    (commandContainer, command) => commandContainer.copyWith(command: command),
+  );
+
   static final attributes = Lens<DisplayRelation, List<Attribute>>(
     (attributesContainer) => attributesContainer.attributes,
     (attributesContainer, attributes) =>
