@@ -118,14 +118,18 @@ class _MyHomePageState extends State<MyHomePage> {
             Obx(() => Text('Status: ' + (_.promptInfo.value == null
                 ? 'Disconnected'
                 : 'Connected. Current Branch:(${_.promptInfo.value?.headName}) Schema:(${_.promptInfo.value?.schemaName})'))),
-            Form(
-              child: TextFormField(
-                controller: _.textCtr,
-                decoration: const InputDecoration(labelText: 'Enter a TutorialD query here.'),
+            Obx(() => 
+              Form(
+                child: TextFormField(
+                  enabled: _.connPhase.value == ConnectionPhase.executetutd,
+                  controller: _.textCtr,
+                  decoration: const InputDecoration(labelText: 'Enter a TutorialD query here.'),
+                ),
               ),
             ),
             Container(
-              height: 250,
+              width: MediaQuery.of(context).size.width,
+              height: 190,
               child: Obx(() => ListView.builder(
                     itemBuilder: (context, index) {
                       return ListTile(
@@ -223,8 +227,9 @@ class MyHomePageLogic extends GetxController {
     }
   }
   void disconnect() {
-    responses = <Item>[];
+    responses.clear();
     promptInfo.value = null;
+    textCtr.text = '';
     _channel.sink.close();
     connPhase.value = ConnectionPhase.disconnected;
   }
