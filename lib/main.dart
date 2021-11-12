@@ -1,12 +1,12 @@
-import 'dart:io';
+// import 'dart:io';
 import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:web_socket_channel/io.dart';
+// import 'package:web_socket_channel/io.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:convert';
 import 'behavior.dart';
 import 'relation.dart';
-
+import 'package:flutter/services.dart';
 void main() {
   runApp(MyApp());
 }
@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    const title = 'Websocket Demo';
+    const title = 'Project:M36 Websocket Client';
     return GetMaterialApp(
       title: title,
       home: MyHomePage(title: title),
@@ -36,7 +36,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-    final MyHomePageLogic _logic = Get.put(MyHomePageLogic());
+    final MyHomePageLogic _ = Get.put(MyHomePageLogic());
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -46,13 +46,82 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Obx(() => Text(_logic.promptInfo.value == null
-                ? 'no db yet'
-                : 'Current Branch:(${_logic.promptInfo.value?.headName}) Schema:(${_logic.promptInfo.value?.schemaName})')),
+            Text('This flutter app will allow you to try TutorialD websocket server. Try some of the sample queries below.'),
+            Obx( ()=>
+              Row(
+                children: <Widget>[
+                  Text('connect to:'),
+                  DropdownButton<WebSocketProtocol>(
+                    value: _.wsProtocol.value,
+                    onChanged: (_.connPhase.value == ConnectionPhase.executetutd) ? null :
+                      (WebSocketProtocol? newValue) {
+                        if( newValue != null ){ _.wsProtocol.value = newValue; }
+//                    setState(() {
+//                      dropdownValue = newValue!;
+//                    });
+                    },
+                    items: <WebSocketProtocol>[WebSocketProtocol.ws, WebSocketProtocol.wss]
+                           .map<DropdownMenuItem<WebSocketProtocol>>((WebSocketProtocol value) {
+                             return DropdownMenuItem<WebSocketProtocol>(
+                               value: value,
+                               child: Text(value.toString().split('.')[1]),
+                             );
+                           }).toList(),
+                  ),
+                  Text("://"),
+                  SizedBox(
+                    width: 150,
+                    child: TextField(
+                      enabled: _.connPhase.value == ConnectionPhase.disconnected,
+                      controller: _.ipAddressCtr,
+                      decoration: const InputDecoration(labelText: 'ip address'),
+                    ),
+                  ),
+                  Text(':'),
+                  SizedBox(
+                    width: 50,
+                    child: TextField(
+                      enabled: _.connPhase.value == ConnectionPhase.disconnected,
+                      controller: _.portCtr,
+                      decoration: new InputDecoration(labelText: "Enter your number"),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly
+                      ], // Only numbers can be entered
+                    ),
+                  ),
+                  Text('/'),
+                  SizedBox(
+                    width: 150,
+                    child: TextField(
+                      enabled: _.connPhase.value == ConnectionPhase.disconnected,
+                      controller: _.directoryCtr,
+                      decoration: const InputDecoration(labelText: 'directory'),
+                    ),
+                  ),
+                  Text(' database:'),
+                  SizedBox(
+                    width: 150,
+                    child: TextField(
+                      enabled: _.connPhase.value == ConnectionPhase.disconnected,
+                      controller: _.databaseNameCtr,
+                      decoration: const InputDecoration(labelText: 'db name'),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: (_.connPhase.value == ConnectionPhase.executetutd) ? _.disconnect : _.connect,
+                    child: (_.connPhase.value == ConnectionPhase.executetutd) ? Text('Disconnect') : Text('Connect'),
+                  ),        
+                ]),
+            ),
+            
+            Obx(() => Text('Status: ' + (_.promptInfo.value == null
+                ? 'Disconnected'
+                : 'Connected. Current Branch:(${_.promptInfo.value?.headName}) Schema:(${_.promptInfo.value?.schemaName})'))),
             Form(
               child: TextFormField(
-                controller: _logic.textCtr,
-                decoration: const InputDecoration(labelText: 'enter a db name'),
+                controller: _.textCtr,
+                decoration: const InputDecoration(labelText: 'Enter a TutorialD query here.'),
               ),
             ),
             Container(
@@ -60,17 +129,17 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Obx(() => ListView.builder(
                     itemBuilder: (context, index) {
                       return ListTile(
-                        title: _logic.responses[index].buildItem(),
+                        title: _.responses[index].buildItem(),
                       );
                     },
-                    itemCount: _logic.responses.length,
+                    itemCount: _.responses.length,
                   )),
             ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _logic.sendMessage,
+        onPressed: _.sendMessage,
         tooltip: 'Send message',
         child: Icon(Icons.send),
       ), // This trailing comma makes auto-formatting nicer for build methods.
@@ -83,26 +152,42 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-enum ConnectionPhase { connectdb, executetutd }
+enum WebSocketProtocol { ws, wss }
+enum ConnectionPhase { disconnected, executetutd }
 
 class MyHomePageLogic extends GetxController {
-  final _channel = WebSocketChannel.connect(Uri.parse('ws://127.0.0.1:8000'));
-  final TextEditingController textCtr = TextEditingController();
-  var connPhase = ConnectionPhase.connectdb.obs;
+//  final _channel = WebSocketChannel.connect(Uri.parse('ws://127.0.0.1:8000'));
+  var _channel; 
+  var wsProtocol = WebSocketProtocol.ws.obs;
+  final TextEditingController ipAddressCtr = TextEditingController();
+  final TextEditingController portCtr = TextEditingController();
+  final TextEditingController directoryCtr = TextEditingController();
+  final TextEditingController databaseNameCtr = TextEditingController();
+  var connPhase = ConnectionPhase.disconnected.obs;
   var db = ''.obs;
   var promptInfo = Rxn<PromptInfo>(); //nullable observable variable
+  final TextEditingController textCtr = TextEditingController();
   List<Item> responses = <Item>[].obs;
 
 
   void onInit() {
+    ipAddressCtr.text = '127.0.0.1';
+    portCtr.text = '8000';
+    databaseNameCtr.text = 'db';
+  }
+
+  void connect() {
+    _channel = WebSocketChannel.connect(Uri.parse(wsProtocol.value.toString().split('.')[1] + '://' + ipAddressCtr.text + ':' + portCtr.text + '/' + directoryCtr.text ));
     _channel.stream.listen((msg) => handleResponse(msg));
+    _channel.sink.add('connectdb:' + databaseNameCtr.text);
+    connPhase.value = ConnectionPhase.executetutd;
   }
 
   void sendMessage() {
     print('send ${textCtr.text}');
     if (textCtr.text.isNotEmpty) {
       switch (connPhase.value) {
-        case ConnectionPhase.connectdb:
+        case ConnectionPhase.disconnected:
           {
             _channel.sink.add('connectdb:' + textCtr.text);
             connPhase.value = ConnectionPhase.executetutd;
@@ -137,7 +222,12 @@ class MyHomePageLogic extends GetxController {
       responses.insert(0, DisplayJson.fromJson(json));
     }
   }
-
+  void disconnect() {
+    responses = <Item>[];
+    promptInfo.value = null;
+    _channel.sink.close();
+    connPhase.value = ConnectionPhase.disconnected;
+  }
   void onClose() {
     _channel.sink.close();
   }
