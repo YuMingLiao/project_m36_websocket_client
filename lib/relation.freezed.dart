@@ -43,6 +43,12 @@ class _$AtomTypeTearOff {
       typeVarMap,
     );
   }
+
+  RelationAtomType relationAtomType(List<Attribute> attributes) {
+    return RelationAtomType(
+      attributes,
+    );
+  }
 }
 
 /// @nodoc
@@ -60,6 +66,7 @@ mixin _$AtomType {
     required TResult Function(
             String typeConstructorName, Map<String, AtomType> typeVarMap)
         constructedAtomType,
+    required TResult Function(List<Attribute> attributes) relationAtomType,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -72,6 +79,7 @@ mixin _$AtomType {
     TResult Function(
             String typeConstructorName, Map<String, AtomType> typeVarMap)?
         constructedAtomType,
+    TResult Function(List<Attribute> attributes)? relationAtomType,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -83,6 +91,7 @@ mixin _$AtomType {
     required TResult Function(TextAtomType value) textAtomType,
     required TResult Function(BoolAtomType value) boolAtomType,
     required TResult Function(ConstructedAtomType value) constructedAtomType,
+    required TResult Function(RelationAtomType value) relationAtomType,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -93,6 +102,7 @@ mixin _$AtomType {
     TResult Function(TextAtomType value)? textAtomType,
     TResult Function(BoolAtomType value)? boolAtomType,
     TResult Function(ConstructedAtomType value)? constructedAtomType,
+    TResult Function(RelationAtomType value)? relationAtomType,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -160,6 +170,7 @@ class _$IntAtomType extends IntAtomType {
     required TResult Function(
             String typeConstructorName, Map<String, AtomType> typeVarMap)
         constructedAtomType,
+    required TResult Function(List<Attribute> attributes) relationAtomType,
   }) {
     return intAtomType();
   }
@@ -175,6 +186,7 @@ class _$IntAtomType extends IntAtomType {
     TResult Function(
             String typeConstructorName, Map<String, AtomType> typeVarMap)?
         constructedAtomType,
+    TResult Function(List<Attribute> attributes)? relationAtomType,
     required TResult orElse(),
   }) {
     if (intAtomType != null) {
@@ -192,6 +204,7 @@ class _$IntAtomType extends IntAtomType {
     required TResult Function(TextAtomType value) textAtomType,
     required TResult Function(BoolAtomType value) boolAtomType,
     required TResult Function(ConstructedAtomType value) constructedAtomType,
+    required TResult Function(RelationAtomType value) relationAtomType,
   }) {
     return intAtomType(this);
   }
@@ -205,6 +218,7 @@ class _$IntAtomType extends IntAtomType {
     TResult Function(TextAtomType value)? textAtomType,
     TResult Function(BoolAtomType value)? boolAtomType,
     TResult Function(ConstructedAtomType value)? constructedAtomType,
+    TResult Function(RelationAtomType value)? relationAtomType,
     required TResult orElse(),
   }) {
     if (intAtomType != null) {
@@ -266,6 +280,7 @@ class _$IntegerAtomType extends IntegerAtomType {
     required TResult Function(
             String typeConstructorName, Map<String, AtomType> typeVarMap)
         constructedAtomType,
+    required TResult Function(List<Attribute> attributes) relationAtomType,
   }) {
     return integerAtomType();
   }
@@ -281,6 +296,7 @@ class _$IntegerAtomType extends IntegerAtomType {
     TResult Function(
             String typeConstructorName, Map<String, AtomType> typeVarMap)?
         constructedAtomType,
+    TResult Function(List<Attribute> attributes)? relationAtomType,
     required TResult orElse(),
   }) {
     if (integerAtomType != null) {
@@ -298,6 +314,7 @@ class _$IntegerAtomType extends IntegerAtomType {
     required TResult Function(TextAtomType value) textAtomType,
     required TResult Function(BoolAtomType value) boolAtomType,
     required TResult Function(ConstructedAtomType value) constructedAtomType,
+    required TResult Function(RelationAtomType value) relationAtomType,
   }) {
     return integerAtomType(this);
   }
@@ -311,6 +328,7 @@ class _$IntegerAtomType extends IntegerAtomType {
     TResult Function(TextAtomType value)? textAtomType,
     TResult Function(BoolAtomType value)? boolAtomType,
     TResult Function(ConstructedAtomType value)? constructedAtomType,
+    TResult Function(RelationAtomType value)? relationAtomType,
     required TResult orElse(),
   }) {
     if (integerAtomType != null) {
@@ -372,6 +390,7 @@ class _$DoubleAtomType extends DoubleAtomType {
     required TResult Function(
             String typeConstructorName, Map<String, AtomType> typeVarMap)
         constructedAtomType,
+    required TResult Function(List<Attribute> attributes) relationAtomType,
   }) {
     return doubleAtomType();
   }
@@ -387,6 +406,7 @@ class _$DoubleAtomType extends DoubleAtomType {
     TResult Function(
             String typeConstructorName, Map<String, AtomType> typeVarMap)?
         constructedAtomType,
+    TResult Function(List<Attribute> attributes)? relationAtomType,
     required TResult orElse(),
   }) {
     if (doubleAtomType != null) {
@@ -404,6 +424,7 @@ class _$DoubleAtomType extends DoubleAtomType {
     required TResult Function(TextAtomType value) textAtomType,
     required TResult Function(BoolAtomType value) boolAtomType,
     required TResult Function(ConstructedAtomType value) constructedAtomType,
+    required TResult Function(RelationAtomType value) relationAtomType,
   }) {
     return doubleAtomType(this);
   }
@@ -417,6 +438,7 @@ class _$DoubleAtomType extends DoubleAtomType {
     TResult Function(TextAtomType value)? textAtomType,
     TResult Function(BoolAtomType value)? boolAtomType,
     TResult Function(ConstructedAtomType value)? constructedAtomType,
+    TResult Function(RelationAtomType value)? relationAtomType,
     required TResult orElse(),
   }) {
     if (doubleAtomType != null) {
@@ -478,6 +500,7 @@ class _$TextAtomType extends TextAtomType {
     required TResult Function(
             String typeConstructorName, Map<String, AtomType> typeVarMap)
         constructedAtomType,
+    required TResult Function(List<Attribute> attributes) relationAtomType,
   }) {
     return textAtomType();
   }
@@ -493,6 +516,7 @@ class _$TextAtomType extends TextAtomType {
     TResult Function(
             String typeConstructorName, Map<String, AtomType> typeVarMap)?
         constructedAtomType,
+    TResult Function(List<Attribute> attributes)? relationAtomType,
     required TResult orElse(),
   }) {
     if (textAtomType != null) {
@@ -510,6 +534,7 @@ class _$TextAtomType extends TextAtomType {
     required TResult Function(TextAtomType value) textAtomType,
     required TResult Function(BoolAtomType value) boolAtomType,
     required TResult Function(ConstructedAtomType value) constructedAtomType,
+    required TResult Function(RelationAtomType value) relationAtomType,
   }) {
     return textAtomType(this);
   }
@@ -523,6 +548,7 @@ class _$TextAtomType extends TextAtomType {
     TResult Function(TextAtomType value)? textAtomType,
     TResult Function(BoolAtomType value)? boolAtomType,
     TResult Function(ConstructedAtomType value)? constructedAtomType,
+    TResult Function(RelationAtomType value)? relationAtomType,
     required TResult orElse(),
   }) {
     if (textAtomType != null) {
@@ -584,6 +610,7 @@ class _$BoolAtomType extends BoolAtomType {
     required TResult Function(
             String typeConstructorName, Map<String, AtomType> typeVarMap)
         constructedAtomType,
+    required TResult Function(List<Attribute> attributes) relationAtomType,
   }) {
     return boolAtomType();
   }
@@ -599,6 +626,7 @@ class _$BoolAtomType extends BoolAtomType {
     TResult Function(
             String typeConstructorName, Map<String, AtomType> typeVarMap)?
         constructedAtomType,
+    TResult Function(List<Attribute> attributes)? relationAtomType,
     required TResult orElse(),
   }) {
     if (boolAtomType != null) {
@@ -616,6 +644,7 @@ class _$BoolAtomType extends BoolAtomType {
     required TResult Function(TextAtomType value) textAtomType,
     required TResult Function(BoolAtomType value) boolAtomType,
     required TResult Function(ConstructedAtomType value) constructedAtomType,
+    required TResult Function(RelationAtomType value) relationAtomType,
   }) {
     return boolAtomType(this);
   }
@@ -629,6 +658,7 @@ class _$BoolAtomType extends BoolAtomType {
     TResult Function(TextAtomType value)? textAtomType,
     TResult Function(BoolAtomType value)? boolAtomType,
     TResult Function(ConstructedAtomType value)? constructedAtomType,
+    TResult Function(RelationAtomType value)? relationAtomType,
     required TResult orElse(),
   }) {
     if (boolAtomType != null) {
@@ -730,6 +760,7 @@ class _$ConstructedAtomType extends ConstructedAtomType {
     required TResult Function(
             String typeConstructorName, Map<String, AtomType> typeVarMap)
         constructedAtomType,
+    required TResult Function(List<Attribute> attributes) relationAtomType,
   }) {
     return constructedAtomType(typeConstructorName, typeVarMap);
   }
@@ -745,6 +776,7 @@ class _$ConstructedAtomType extends ConstructedAtomType {
     TResult Function(
             String typeConstructorName, Map<String, AtomType> typeVarMap)?
         constructedAtomType,
+    TResult Function(List<Attribute> attributes)? relationAtomType,
     required TResult orElse(),
   }) {
     if (constructedAtomType != null) {
@@ -762,6 +794,7 @@ class _$ConstructedAtomType extends ConstructedAtomType {
     required TResult Function(TextAtomType value) textAtomType,
     required TResult Function(BoolAtomType value) boolAtomType,
     required TResult Function(ConstructedAtomType value) constructedAtomType,
+    required TResult Function(RelationAtomType value) relationAtomType,
   }) {
     return constructedAtomType(this);
   }
@@ -775,6 +808,7 @@ class _$ConstructedAtomType extends ConstructedAtomType {
     TResult Function(TextAtomType value)? textAtomType,
     TResult Function(BoolAtomType value)? boolAtomType,
     TResult Function(ConstructedAtomType value)? constructedAtomType,
+    TResult Function(RelationAtomType value)? relationAtomType,
     required TResult orElse(),
   }) {
     if (constructedAtomType != null) {
@@ -794,5 +828,147 @@ abstract class ConstructedAtomType extends AtomType {
   Map<String, AtomType> get typeVarMap => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
   $ConstructedAtomTypeCopyWith<ConstructedAtomType> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $RelationAtomTypeCopyWith<$Res> {
+  factory $RelationAtomTypeCopyWith(
+          RelationAtomType value, $Res Function(RelationAtomType) then) =
+      _$RelationAtomTypeCopyWithImpl<$Res>;
+  $Res call({List<Attribute> attributes});
+}
+
+/// @nodoc
+class _$RelationAtomTypeCopyWithImpl<$Res> extends _$AtomTypeCopyWithImpl<$Res>
+    implements $RelationAtomTypeCopyWith<$Res> {
+  _$RelationAtomTypeCopyWithImpl(
+      RelationAtomType _value, $Res Function(RelationAtomType) _then)
+      : super(_value, (v) => _then(v as RelationAtomType));
+
+  @override
+  RelationAtomType get _value => super._value as RelationAtomType;
+
+  @override
+  $Res call({
+    Object? attributes = freezed,
+  }) {
+    return _then(RelationAtomType(
+      attributes == freezed
+          ? _value.attributes
+          : attributes // ignore: cast_nullable_to_non_nullable
+              as List<Attribute>,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$RelationAtomType extends RelationAtomType {
+  const _$RelationAtomType(this.attributes) : super._();
+
+  @override
+  final List<Attribute> attributes;
+
+  @override
+  String toString() {
+    return 'AtomType.relationAtomType(attributes: $attributes)';
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other is RelationAtomType &&
+            (identical(other.attributes, attributes) ||
+                const DeepCollectionEquality()
+                    .equals(other.attributes, attributes)));
+  }
+
+  @override
+  int get hashCode =>
+      runtimeType.hashCode ^ const DeepCollectionEquality().hash(attributes);
+
+  @JsonKey(ignore: true)
+  @override
+  $RelationAtomTypeCopyWith<RelationAtomType> get copyWith =>
+      _$RelationAtomTypeCopyWithImpl<RelationAtomType>(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() intAtomType,
+    required TResult Function() integerAtomType,
+    required TResult Function() doubleAtomType,
+    required TResult Function() textAtomType,
+    required TResult Function() boolAtomType,
+    required TResult Function(
+            String typeConstructorName, Map<String, AtomType> typeVarMap)
+        constructedAtomType,
+    required TResult Function(List<Attribute> attributes) relationAtomType,
+  }) {
+    return relationAtomType(attributes);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? intAtomType,
+    TResult Function()? integerAtomType,
+    TResult Function()? doubleAtomType,
+    TResult Function()? textAtomType,
+    TResult Function()? boolAtomType,
+    TResult Function(
+            String typeConstructorName, Map<String, AtomType> typeVarMap)?
+        constructedAtomType,
+    TResult Function(List<Attribute> attributes)? relationAtomType,
+    required TResult orElse(),
+  }) {
+    if (relationAtomType != null) {
+      return relationAtomType(attributes);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(IntAtomType value) intAtomType,
+    required TResult Function(IntegerAtomType value) integerAtomType,
+    required TResult Function(DoubleAtomType value) doubleAtomType,
+    required TResult Function(TextAtomType value) textAtomType,
+    required TResult Function(BoolAtomType value) boolAtomType,
+    required TResult Function(ConstructedAtomType value) constructedAtomType,
+    required TResult Function(RelationAtomType value) relationAtomType,
+  }) {
+    return relationAtomType(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(IntAtomType value)? intAtomType,
+    TResult Function(IntegerAtomType value)? integerAtomType,
+    TResult Function(DoubleAtomType value)? doubleAtomType,
+    TResult Function(TextAtomType value)? textAtomType,
+    TResult Function(BoolAtomType value)? boolAtomType,
+    TResult Function(ConstructedAtomType value)? constructedAtomType,
+    TResult Function(RelationAtomType value)? relationAtomType,
+    required TResult orElse(),
+  }) {
+    if (relationAtomType != null) {
+      return relationAtomType(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class RelationAtomType extends AtomType {
+  const factory RelationAtomType(List<Attribute> attributes) =
+      _$RelationAtomType;
+  const RelationAtomType._() : super._();
+
+  List<Attribute> get attributes => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $RelationAtomTypeCopyWith<RelationAtomType> get copyWith =>
       throw _privateConstructorUsedError;
 }

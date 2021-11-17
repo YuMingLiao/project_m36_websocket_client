@@ -242,6 +242,8 @@ class MyHomePageLogic extends GetxController {
       update();
     }
     else if (json.containsKey('displayrelation')){
+      responses.insert(0, DisplayJson.fromJson(commandCtr.text, json));
+      update();
       responses.insert(0, DisplayRelation.fromJson(commandCtr.text, json['displayrelation']));
       update();
     }

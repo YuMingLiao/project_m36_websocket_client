@@ -82,7 +82,7 @@ class DisplayRelation extends $DisplayRelation implements Item{
                : attributes.map((e)=> DataColumn(label: Text('${e.name}::${e.type.atomType.name}'))).toList(),
       rows: (attributes.length == 0 && asList.length == 1) 
             ? [DataRow(cells:[DataCell(Text(''))])]
-            : asList.map((e)=>DataRow(cells: e.atoms.map((e)=>DataCell(Text(e.toString()))).toList())).toList(),
+            : asList.map((e)=>DataRow(cells: e.atoms.map((e)=>DataCell(e.toWidget())).toList().cast<DataCell>())).toList(),
     );
 }
 @FunctionalData()
@@ -131,14 +131,27 @@ class Atom extends $Atom{
   final AttributeType attrType;
   final dynamic val;
   Atom(this.attrType,this.val);
+  /*
   Atom.fromJson(Map<String, dynamic> json)
       : attrType = AttributeType.fromJson(json['type']),
         val  = (json['type']['tag'] != 'ConstructedAtomType')
              ? json ['val']
              : ConstructedAtom.fromJson(json);
+  */
+  Atom.fromJson(Map<String, dynamic> json):
+    attrType = AttributeType.fromJson(json['type']),
+    val = AttributeType.fromJson(json['type']).atomType.when(
+      intAtomType: () => json['val'],
+      integerAtomType: () => json['val'],
+      doubleAtomType: () => json['val'],
+      textAtomType: () => json['val'],
+      boolAtomType: () => json['val'],
+      constructedAtomType: (tConsName, tvMap) => ConstructedAtom.fromJson(json),
+      relationAtomType: (attributes) => RelationAtom.fromJson(json));
+  
   Map<String, dynamic> toJson() => {
         'type' : attrType.toJson,
-        'val'  : val,
+        'val'  : val, //?
       };
   @override
   String toString() =>
@@ -148,7 +161,26 @@ class Atom extends $Atom{
       doubleAtomType: () => '${val.toString()}',
       textAtomType: () => '\"${val}\"',
       boolAtomType: () => '${val.toString()}',
-      constructedAtomType: (tConsName, tvMap) => '${val.toString()}');
+      constructedAtomType: (tConsName, tvMap) => '${val.toString()}',
+      relationAtomType: (attributes) => 'a relation atom');
+
+  Widget toWidget() => 
+    attrType.atomType.when(
+      intAtomType: () => Text(val.toString()),
+      integerAtomType: () => Text(val.toString()),
+      doubleAtomType: () => Text(val.toString()),
+      textAtomType: () => Text(val),      
+      boolAtomType: () => Text(val.toString()),
+      constructedAtomType: (tConsName, tvMap) => Text(val.toString()),
+      relationAtomType: (attributes) => DataTable(
+        columns: (attributes.length == 0) 
+               ? [DataColumn(label: Text(''))]
+               : attributes.map((e)=> DataColumn(label: Text('${e.name}::${e.type.atomType.name}'))).toList(),
+        rows: (attributes.length == 0 && val.asList.length == 1) 
+            ? [DataRow(cells:[DataCell(Text(''))])]
+            : val.asList.map((e)=>DataRow(cells: e.atoms.map((e)=>DataCell(e.toWidget())).toList().cast<DataCell>())).toList().cast<DataRow>(),
+        )
+    );
 }
 
 class ConstructedAtom {
@@ -162,6 +194,15 @@ class ConstructedAtom {
 
   @override
   String toString() => '${dataConstructorName}' + atomList.fold('', (prev, element)=>prev + ' ' + (element.toString().contains(' ') ? '(' + element.toString() + ')' : element.toString()));
+}
+
+class RelationAtom {
+  final List<Attribute> attributes;
+  final List<Tuple> asList;
+  RelationAtom(this.attributes, this.asList);
+  RelationAtom.fromJson(Map<String, dynamic> _json):
+    attributes = List<Attribute>.from((_json['val'][0]['attributes']).map((e) => Attribute.fromJson(e)).toList()),
+    asList = List<Tuple>.from(_json['val'][1]['asList'].map((e) => Tuple.fromJson(e)).toList());
 }
 
 class Item {
@@ -181,6 +222,7 @@ class AtomType with _$AtomType {
   const factory AtomType.textAtomType() = TextAtomType;
   const factory AtomType.boolAtomType() = BoolAtomType;
   const factory AtomType.constructedAtomType(String typeConstructorName, Map<String,AtomType> typeVarMap) = ConstructedAtomType; //contents is a b c in A, B a, C a b, D a b c
+  const factory AtomType.relationAtomType(List<Attribute> attributes) = RelationAtomType;
 //                DayAtomType |
 //                DateTimeAtomType |
 //                ByteStringAtomType |
@@ -199,6 +241,9 @@ class AtomType with _$AtomType {
       String tConsName = json['contents'][0]; /* TypeVarMap */
       Map<String,AtomType> tvMap = json['contents'][1].map((k,v)=>MapEntry(k,AtomType.fromJson(v))).cast<String,AtomType>();
       return AtomType.constructedAtomType(tConsName, tvMap); } 
+    else if(json['tag']=="RelationAtomType"){
+      List<Attribute> attributes = List<Attribute>.from((json['contents']['attributes']).map((e) => Attribute.fromJson(e)).toList());
+      return AtomType.relationAtomType(attributes); }
     else { throw UnimplementedError(json.toString()); } 
   }
   String get name => this.maybeWhen(
@@ -285,4 +330,14 @@ String constructedAtomTypeJson = '''
   }
 }
 '''
+*/
+
+/* RelationAtomType
+"attributes": [
+ {
+          "name": "subrel",
+          "type": {
+            "tag": "RelationAtomType",
+            "contents": {
+              "attributes": [ ...
 */
