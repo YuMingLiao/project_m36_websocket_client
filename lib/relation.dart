@@ -77,12 +77,13 @@ class DisplayRelation extends $DisplayRelation implements Item{
 
   @override
   Widget buildItem() => DataTable(
+      //DataRowHeight: ,
       columns: (attributes.length == 0) 
                ? [DataColumn(label: Text(''))]
                : attributes.map((e)=> DataColumn(label: Text('${e.name}::${e.type.atomType.name}'))).toList(),
       rows: (attributes.length == 0 && asList.length == 1) 
             ? [DataRow(cells:[DataCell(Text(''))])]
-            : asList.map((e)=>DataRow(cells: e.atoms.map((e)=>DataCell(e.toWidget())).toList().cast<DataCell>())).toList(),
+            : asList.map((e)=>DataRow(cells: e.atoms.map((e)=>DataCell(FittedBox(fit: BoxFit.contain, child: e.toWidget()))).toList().cast<DataCell>())).toList(),
     );
 }
 @FunctionalData()
@@ -173,12 +174,13 @@ class Atom extends $Atom{
       boolAtomType: () => Text(val.toString()),
       constructedAtomType: (tConsName, tvMap) => Text(val.toString()),
       relationAtomType: (attributes) => DataTable(
+        //DataRowHeight: ,
         columns: (attributes.length == 0) 
                ? [DataColumn(label: Text(''))]
                : attributes.map((e)=> DataColumn(label: Text('${e.name}::${e.type.atomType.name}'))).toList(),
         rows: (attributes.length == 0 && val.asList.length == 1) 
             ? [DataRow(cells:[DataCell(Text(''))])]
-            : val.asList.map((e)=>DataRow(cells: e.atoms.map((e)=>DataCell(e.toWidget())).toList().cast<DataCell>())).toList().cast<DataRow>(),
+            : val.asList.map((e)=>DataRow(cells: e.atoms.map((e)=>DataCell(FittedBox(fit: BoxFit.contain, child: e.toWidget()))).toList().cast<DataCell>())).toList().cast<DataRow>(),
         )
     );
 }
