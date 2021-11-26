@@ -1,6 +1,6 @@
 # project_m36_websocket_client
 
-A Flutter websocket client for [Project-M36](https://github.com/agentm/project-m36). 
+A Flutter web websocket client for [Project-M36](https://github.com/agentm/project-m36). 
 It's also an attempt to bring algebraic datatypes into the Dart land.
 
  [Project-M36](https://github.com/agentm/project-m36) also has a javascript version of [websocket client](https://github.com/agentm/project-m36/blob/master/docs/websocket_server.markdown).
