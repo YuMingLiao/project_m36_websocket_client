@@ -5,7 +5,7 @@ It's also an attempt to bring algebraic datatypes into the Dart land.
 
  [Project-M36](https://github.com/agentm/project-m36) also has a javascript version of [websocket client](https://github.com/agentm/project-m36/blob/master/docs/websocket_server.markdown).
 
-<img src="images/Screenshot_20211205_145921.png" alt="a" width="800"/>
+<img src="images/Screenshot_20211205_145921.png" alt="a" width="1000"/>
 
 ## Getting Started
 1. `git clone` the repo.
